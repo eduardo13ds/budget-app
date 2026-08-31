@@ -1041,25 +1041,32 @@ function renderApp() {
 
 function renderAuthHeader() {
   const container = document.getElementById('authHeaderContainer');
-  if (!container) return;
+  const mainApp = document.getElementById('mainApp');
+  const authScreen = document.getElementById('fullScreenAuth');
 
   if (currentUser) {
-    container.innerHTML = `
-      <div class="flex items-center gap-1.5 border-hard rounded-pill px-2.5 py-1 bg-pastel-mint">
-        <span class="w-2 h-2 rounded-full bg-emerald-700"></span>
-        <span class="font-mono text-xs font-bold text-emerald-950 truncate max-w-[140px]" title="${currentUser.email}">${currentUser.email}</span>
-      </div>
-      <button onclick="handleSignOut()" class="btn-secondary btn-pill-small" title="${t('logOut')}">
-        ${t('logOut')}
-      </button>
-    `;
+    if (mainApp) mainApp.style.display = 'block';
+    if (authScreen) authScreen.style.display = 'none';
+
+    if (container) {
+      container.innerHTML = `
+        <div class="flex items-center gap-1.5 border-hard rounded-pill px-2.5 py-1 bg-pastel-mint">
+          <span class="w-2 h-2 rounded-full bg-emerald-700"></span>
+          <span class="font-mono text-xs font-bold text-emerald-950 truncate max-w-[140px]" title="${currentUser.email}">${currentUser.email}</span>
+        </div>
+        <button onclick="handleSignOut()" class="btn-secondary btn-pill-small" title="${t('logOut')}">
+          ${t('logOut')}
+        </button>
+      `;
+    }
   } else {
-    container.innerHTML = `
-      <button onclick="openAuthModal('signin')" class="btn-primary btn-pill-small">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-        ${t('signInSignUp')}
-      </button>
-    `;
+    if (mainApp) mainApp.style.display = 'none';
+    if (authScreen) {
+      authScreen.style.display = 'flex';
+      openAuthModal('signin'); // trigger rendering of auth screen content
+    }
+    
+    if (container) container.innerHTML = '';
   }
 }
 
@@ -2105,17 +2112,19 @@ window.openAuthModal = function(defaultTab = 'signin') {
 function renderAuthModalContent(errorMessage = null, successMessage = null) {
   const isSignIn = currentAuthTab === 'signin';
   const isEn = state.language === 'en';
-
-  openModal(`
-    <div class="flex items-center justify-between pb-3 mb-4 border-b-hard">
-      <div class="flex items-center gap-2">
-        <div class="w-7 h-7 rounded-inner border-hard bg-black flex items-center justify-center text-white font-mono font-bold text-xs">
-          //
+  
+  const authScreen = document.getElementById('fullScreenAuth');
+  if (!authScreen) return;
+  authScreen.innerHTML = `
+    <div class="w-full max-w-sm mx-auto p-6 bg-white border-hard rounded-card stacked-sheet">
+      <div class="flex items-center pb-3 mb-4 border-b-hard">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-inner border-hard bg-black flex items-center justify-center text-white font-mono font-bold text-xs">
+            //
+          </div>
+          <h3 class="text-xl font-bold">${isEn ? 'Cloud Account' : 'Conta na Nuvem'}</h3>
         </div>
-        <h3 class="text-xl font-bold">${isEn ? 'Cloud Account' : 'Conta na Nuvem'}</h3>
       </div>
-      <button onclick="closeModal()" class="text-xl font-bold hover:text-neutral-500">✕</button>
-    </div>
 
     <!-- Neo-Grotesque Segmented Tab Switcher -->
     <div class="flex p-1 bg-[#F3F4F6] border-hard rounded-pill mb-4">
@@ -2161,14 +2170,11 @@ function renderAuthModalContent(errorMessage = null, successMessage = null) {
     </form>
 
     <div class="mt-4 pt-3 border-t-hard flex flex-col gap-2 text-center">
-      <button onclick="closeModal()" class="btn-secondary text-xs py-1.5">
-        ${isEn ? 'Continue in Guest / Offline Mode' : 'Continuar em Modo Convidado / Offline'}
-      </button>
       <p class="text-[0.68rem] text-neutral-500 font-mono">
-        Supabase Auth • Real-time Cloud Synchronization
+        Supabase Auth — Real-time Cloud Synchronization
       </p>
     </div>
-  `);
+  </div>`;
 }
 
 window.switchAuthTab = function(tab) {

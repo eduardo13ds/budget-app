@@ -38,7 +38,13 @@
   </script>
 </head>
 <body class="bg-white text-[#111827] antialiased min-h-screen">
+  
+  <!-- ================= AUTHENTICATION SCREEN ================= -->
+  <div id="fullScreenAuth" class="min-h-screen bg-pastel-gray flex items-center justify-center p-4">
+    <!-- Auth content injected via JS -->
+  </div>
 
+  <div id="mainApp" style="display: none;">
   <!-- ================= TOP NAVIGATION BAR ================= -->
   <header class="border-b-hard bg-white sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
@@ -471,8 +477,9 @@
       <span id="navSettingsLabel" class="label">Settings</span>
     </button>
   </nav>
+  </div> <!-- end mainApp -->
 
   <!-- Core JavaScript Logic -->
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>
