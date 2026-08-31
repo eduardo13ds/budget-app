@@ -1029,6 +1029,7 @@ function renderApp() {
   applyStaticTranslations();
   renderAuthHeader();
   renderHeroAndAllocationOverview();
+  renderMealVoucherSection();
   renderDebtsSection();
   renderFixedPaymentsSection();
   renderWeekendSection();
@@ -1772,12 +1773,127 @@ function renderKeepSection() {
   }
 }
 
+// --- VALE REFEIÇÃO (MEAL VOUCHER) ---
+function renderMealVoucherSection() {
+  const container = document.getElementById('mealVoucherContainer');
+  if (!container) return;
+
+  const isEn = state.language === 'en';
+  let mvState = state.customAreas.find(c => c.id === 'meal-voucher-state');
+  if (!mvState) {
+    mvState = {
+      id: 'meal-voucher-state',
+      amount: 800,
+      groceriesPercent: 50,
+      eatingOutPercent: 50
+    };
+    state.customAreas.push(mvState);
+  }
+
+  const amount = Number(mvState.amount) || 0;
+  const groc = amount * (mvState.groceriesPercent / 100);
+  const eat = amount * (mvState.eatingOutPercent / 100);
+
+  container.innerHTML = `
+    <div class="space-y-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div class="inline-flex items-center gap-2 badge-pill bg-white border-hard text-[0.7rem] mb-2">
+            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+            <span>${isEn ? 'COMPANY BENEFIT' : 'BENEFÍCIO CORPORATIVO'}</span>
+          </div>
+          <h2 class="text-3xl font-extrabold tracking-tight">${isEn ? 'Meal Voucher' : 'Vale Refeição'}</h2>
+          <p class="text-sm font-medium text-neutral-600 mt-2 max-w-lg">
+            ${isEn ? 'Separated from salary. Track food groceries and eating out.' : 'Separado do seu dinheiro vivo. Divida o saldo do VR entre as compras do mês e os lanches na rua.'}
+          </p>
+        </div>
+        <div class="bg-white border-hard rounded-inner p-3 flex items-center gap-3 w-full md:w-auto">
+          <label class="text-xs font-bold font-mono-tech whitespace-nowrap">${isEn ? 'TOTAL VOUCHER' : 'TOTAL DO VR'}</label>
+          <div class="flex items-center gap-1">
+            <span class="font-mono-tech font-bold text-sm text-neutral-500">${state.currency}</span>
+            <input type="number" 
+                   class="w-24 border-b-hard bg-transparent font-mono font-bold text-lg text-right focus:outline-none focus:border-black transition-colors" 
+                   value="${amount}" 
+                   min="0" step="10" 
+                   onchange="updateMealVoucher('amount', this.value)" />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Groceries -->
+        <div class="border-hard rounded-container bg-white p-6 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-1.5 h-full bg-orange-400"></div>
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="text-xl font-bold">${isEn ? 'Groceries' : 'Compras da Casa'}</h3>
+              <p class="text-xs text-neutral-500 mt-1">${isEn ? 'Supermarket and bulk food' : 'Supermercado e feira'}</p>
+            </div>
+            <div class="flex items-center gap-1 border-hard rounded-pill px-2 py-1 bg-pastel-gray">
+              <input type="number" 
+                     class="w-12 text-center bg-transparent text-xs font-bold font-mono focus:outline-none" 
+                     value="${mvState.groceriesPercent}" 
+                     min="0" max="100" step="1" 
+                     onchange="updateMealVoucher('groceriesPercent', this.value)" />
+              <span class="text-xs font-bold font-mono">%</span>
+            </div>
+          </div>
+          <div class="text-3xl font-extrabold tracking-tight mb-2">${formatCurrency(groc)}</div>
+        </div>
+
+        <!-- Eating Out -->
+        <div class="border-hard rounded-container bg-white p-6 relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-1.5 h-full bg-rose-400"></div>
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h3 class="text-xl font-bold">${isEn ? 'Eating Out' : 'Comer Fora'}</h3>
+              <p class="text-xs text-neutral-500 mt-1">${isEn ? 'Restaurants and delivery' : 'Restaurantes, padarias e ifood'}</p>
+            </div>
+            <div class="flex items-center gap-1 border-hard rounded-pill px-2 py-1 bg-pastel-gray">
+              <input type="number" 
+                     class="w-12 text-center bg-transparent text-xs font-bold font-mono focus:outline-none" 
+                     value="${mvState.eatingOutPercent}" 
+                     min="0" max="100" step="1" 
+                     onchange="updateMealVoucher('eatingOutPercent', this.value)" />
+              <span class="text-xs font-bold font-mono">%</span>
+            </div>
+          </div>
+          <div class="text-3xl font-extrabold tracking-tight mb-2">${formatCurrency(eat)}</div>
+        </div>
+
+      </div>
+    </div>
+  `;
+}
+
+window.updateMealVoucher = function(field, val) {
+  let mvState = state.customAreas.find(c => c.id === 'meal-voucher-state');
+  if (!mvState) return;
+
+  const numVal = Math.max(0, Number(val) || 0);
+
+  if (field === 'amount') {
+    mvState.amount = numVal;
+  } else if (field === 'groceriesPercent') {
+    const groc = Math.min(100, numVal);
+    mvState.groceriesPercent = groc;
+    mvState.eatingOutPercent = 100 - groc;
+  } else if (field === 'eatingOutPercent') {
+    const eat = Math.min(100, numVal);
+    mvState.eatingOutPercent = eat;
+    mvState.groceriesPercent = 100 - eat;
+  }
+
+  saveState();
+};
+
 // --- Area 5: Custom Budget Areas ---
 function renderCustomAreasSection() {
   const container = document.getElementById('customAreasContainer');
   if (!container) return;
 
-  const customAreas = state.customAreas || [];
+  const customAreas = (state.customAreas || []).filter(c => c.id !== 'meal-voucher-state');
   if (customAreas.length === 0) {
     container.innerHTML = `
       <div class="p-8 text-center border-hard rounded-card bg-white">
