@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Budget & Allocation Engine</title>
+  
+  <!-- Neo-Grotesque & Monospace Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Design System Stylesheet -->
+  <link rel="stylesheet" href="styles.css?v=2" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandDark: '#111827',
+            pastelMint: '#E8F8EE',
+            pastelBlue: '#E9F2FE',
+            pastelYellow: '#FFF8DB',
+            pastelPeriwinkle: '#EFEFFA',
+            pastelPeach: '#FFEFEA',
+            pastelGray: '#F3F4F6',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-white text-[#111827] antialiased min-h-screen">
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="border-b-hard bg-white sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand & Abstract Technical Monogram -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-card border-hard bg-black flex items-center justify-center text-white font-mono font-bold text-base">
+          //
+        </div>
+        <div>
+          <div class="font-extrabold text-base tracking-tight leading-tight flex items-center gap-2">
+            <span id="appTitleText">LEDGER & ALLOCATIONS</span>
+            <span class="badge-pill bg-pastel-mint text-emerald-950 border-hard text-[0.6rem] py-0.5 px-2">v1.2</span>
+          </div>
+          <p id="appSubtitleText" class="font-mono-tech text-neutral-500 text-[0.65rem]">Algorithmic Personal Budget Architecture</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex items-center gap-2.5 flex-wrap">
+        
+        <!-- Live Supabase Status Pill -->
+        <button id="cloudStatusBtn" onclick="openSettingsModal()" class="flex items-center gap-2 border-hard rounded-pill px-3 py-1 bg-white hover:bg-neutral-50 transition cursor-pointer" title="Supabase Database Status & Settings">
+          <span id="cloudStatusDot" class="cloud-pulse-dot online"></span>
+          <span id="cloudStatusText" class="font-mono-tech text-[0.7rem] font-bold">SAVED</span>
+        </button>
+
+        <!-- Dedicated Settings Button -->
+        <button id="settingsBtn" onclick="openSettingsModal()" class="btn-secondary btn-pill-small flex items-center gap-1.5" title="Settings / Configurações">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span id="settingsBtnLabel">Settings</span>
+        </button>
+
+        <!-- Auth Account Control -->
+        <div id="authHeaderContainer" class="flex items-center gap-1.5">
+          <!-- Injected by app.js: e.g. Sign In pill or user badge -->
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= HERO & SALARY ALLOCATION CONTROLLER ================= -->
+  <section id="overview" class="technical-grid py-12 px-4 sm:px-6 border-b-hard bg-[#FAF9F6]">
+    <div class="max-w-7xl mx-auto space-y-8">
+      
+      <!-- Headline & Introduction -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="space-y-2">
+          <div class="inline-flex items-center gap-2 badge-pill bg-white border-hard text-[0.7rem]">
+            <span class="w-2 h-2 rounded-full bg-black"></span>
+            <span id="heroBadgeText">ZERO DROP-SHADOWS • CONCENTRIC LINE SYSTEM</span>
+          </div>
+          <h1 id="heroHeadingText" class="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
+            Personal Cashflow Architecture
+          </h1>
+          <p id="heroDescText" class="text-sm sm:text-base text-neutral-600 max-w-2xl">
+            Configure your monthly salary and dedicate specific percentage or dollar pools for your old bank debts, fixed living payments, weekend allowance, liquid reserve, and long-term goals.
+          </p>
+        </div>
+
+        <!-- Salary Control Card -->
+        <div class="border-hard rounded-container bg-white p-5 sm:p-6 stacked-sheet min-w-[280px] sm:min-w-[340px]">
+          <div class="flex items-center justify-between mb-2">
+            <label id="salaryLabelText" class="font-mono-tech text-xs font-bold text-neutral-500">MONTHLY BASE SALARY</label>
+            <span id="salaryBadgeText" class="badge-pill bg-pastel-yellow border-hard text-[0.65rem]">NET INCOME</span>
+          </div>
+          <div class="relative flex items-center mb-1">
+            <input 
+              type="number" 
+              id="salaryInput" 
+              min="0" 
+              step="100" 
+              class="text-2xl sm:text-3xl font-extrabold tracking-tight py-2 pl-4 pr-14 rounded-card border-hard font-mono w-full"
+              placeholder="5000"
+            />
+            <span id="salaryFrequencyLabel" class="absolute right-4 text-xs font-mono font-bold text-neutral-400">/ MO</span>
+          </div>
+          <p id="salaryHintText" class="text-[0.65rem] text-neutral-500 mb-3 font-medium">
+            Changes automatically rebalance all assigned percentage allocations.
+          </p>
+          
+          <!-- SALARY SPLITS BREAKDOWN -->
+          <div id="salarySplitsDisplay" class="space-y-1.5 border-t-hard pt-3">
+             <!-- Injected via app.js -->
+          </div>
+          
+          <button onclick="openSalarySplitsModal()" class="text-[0.65rem] font-bold text-neutral-500 hover:text-black mt-2 block w-full text-center border-t border-dashed border-neutral-200 pt-2 transition">
+            ⚙️ <span id="configSplitsBtnText">Configure Paycheck Splits</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Real-Time Multi-Segment Allocation Bar -->
+      <div class="border-hard rounded-container bg-white p-5 sm:p-6 space-y-4">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <span id="distributionLabelText" class="font-mono-tech text-xs font-bold">SALARY SPLIT DISTRIBUTION</span>
+            <div id="allocationStatusBadge" class="badge-pill"></div>
+          </div>
+
+          <div class="flex items-center gap-6 font-mono text-xs">
+            <div>
+              <span id="allocatedLabelText" class="text-neutral-400">Allocated:</span>
+              <strong id="totalAllocatedAmountDisplay" class="text-neutral-900 ml-1">$0.00</strong>
+              <span id="totalAllocatedPercentDisplay" class="text-neutral-500 text-[0.7rem] ml-0.5">(0%)</span>
+            </div>
+            <div>
+              <span id="remainingLabelText" class="text-neutral-400">Remaining:</span>
+              <strong id="unallocatedAmountDisplay" class="text-neutral-900 ml-1">$0.00</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Track -->
+        <div id="allocationMultiBar" class="allocation-multi-bar"></div>
+
+        <!-- Color Legend -->
+        <div class="flex flex-wrap items-center gap-4 text-xs font-mono pt-1">
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-sm border-hard bg-pastel-blue"></span>
+            <span id="legendFixedText">Fixed Bills</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-sm border-hard bg-pastel-periwinkle"></span>
+            <span id="legendDebtsText">Bank Debts</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-sm border-hard bg-pastel-yellow"></span>
+            <span id="legendWeekendText">Weekend Spending</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-3 h-3 rounded-sm border-hard bg-pastel-mint"></span>
+            <span id="legendKeepText">Keep / Savings</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-neutral-400">
+            <span class="w-3 h-3 rounded-sm border-hard bg-white"></span>
+            <span id="legendUnallocatedText">Unassigned Pool</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Area Sliders & Controllers Grid -->
+      <div id="heroAllocationCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Injected via app.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= AREA 1: LONG-TERM BANK DEBTS ================= -->
+  <section id="debts" class="bg-pastel-periwinkle py-12 px-4 sm:px-6 border-b-hard">
+    <div class="max-w-7xl mx-auto space-y-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="area1Badge" class="badge-pill bg-black text-white text-[0.65rem]">AREA 01</span>
+            <h2 id="area1Heading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Bank Debts & Long-Overdue Accounts</h2>
+          </div>
+          <p id="area1Desc" class="text-sm text-neutral-600 max-w-xl">
+            Debts with banks and institutions that haven't been paid for a long time. Set aside a monthly settlement fund to negotiate aggressive discounts (60%–85% haircut).
+          </p>
+        </div>
+
+        <button onclick="openAddDebtModal()" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          <span id="addDebtBtnText">+ Add Bank Debt</span>
+        </button>
+      </div>
+
+      <!-- Summary Metrics Cards -->
+      <div id="debtsSummaryCards" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Injected via app.js -->
+      </div>
+
+      <!-- Debt List Cards -->
+      <div id="debtsList" class="space-y-3">
+        <!-- Injected via app.js -->
+      </div>
+
+      <!-- Debt Settlement Strategy Callout -->
+      <div class="border-hard rounded-card bg-white p-4 flex items-start gap-3">
+        <div class="w-8 h-8 rounded-full border-hard bg-pastel-yellow flex-shrink-0 flex items-center justify-center font-bold text-xs">
+          💡
+        </div>
+        <div class="text-xs space-y-1">
+          <span id="debtTipTitle" class="font-bold text-neutral-900 uppercase tracking-wide">Negotiation Strategy Tip:</span>
+          <p id="debtTipDesc" class="text-neutral-600">
+            For debts delinquent past 12–24 months, banks typically assign or write down debt. Propose a single cash lump-sum settlement from your dedicated fund for 20% to 35% of the initial principal during settlement campaigns (Feirão Limpa Nome, Black Friday, etc.).
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= AREA 2: FIXED MONTHLY PAYMENTS ================= -->
+  <section id="fixed" class="bg-pastel-blue py-12 px-4 sm:px-6 border-b-hard">
+    <div class="max-w-7xl mx-auto space-y-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="area2Badge" class="badge-pill bg-black text-white text-[0.65rem]">AREA 02</span>
+            <h2 id="area2Heading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Fixed Monthly Obligations</h2>
+          </div>
+          <p id="area2Desc" class="text-sm text-neutral-600 max-w-xl">
+            Recurring commitments you cannot skip: rent, cellphone bill, psychologist sessions, internet, health plan, and utilities.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="resetMonthBtn" onclick="resetMonthlyFixedPayments()" class="btn-secondary text-xs">
+            ↺ Reset Month
+          </button>
+          <button onclick="openAddFixedModal()" class="btn-primary">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            <span id="addFixedBtnText">+ Add Fixed Payment</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div id="fixedSummaryCards" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Injected via app.js -->
+      </div>
+
+      <!-- Checklist & Payment Items -->
+      <div id="fixedPaymentsList" class="space-y-3">
+        <!-- Injected via app.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= AREA 3: WEEKEND SPENDING ================= -->
+  <section id="weekend" class="bg-pastel-yellow py-12 px-4 sm:px-6 border-b-hard">
+    <div class="max-w-7xl mx-auto space-y-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="area3Badge" class="badge-pill bg-black text-white text-[0.65rem]">AREA 03</span>
+            <h2 id="area3Heading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Weekend Discretionary Allowance</h2>
+          </div>
+          <p id="area3Desc" class="text-sm text-neutral-600 max-w-xl">
+            Money dedicated strictly for Friday–Sunday recreation, eating out, drinks, and impulse spending without feeling guilty or touching your savings.
+          </p>
+        </div>
+
+        <button onclick="openAddWeekendExpenseModal()" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          <span id="addWeekendBtnText">+ Log Weekend Expense</span>
+        </button>
+      </div>
+
+      <!-- Weekend Metrics Cards -->
+      <div id="weekendSummaryCards" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Injected via app.js -->
+      </div>
+
+      <!-- Weekend Selector Tabs -->
+      <div class="flex items-center gap-2 flex-wrap" id="weekendTabs">
+        <!-- Injected via app.js -->
+      </div>
+
+      <!-- Weekend Expenses List -->
+      <div id="weekendExpensesList" class="space-y-2.5">
+        <!-- Injected via app.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= AREA 4: MONEY I CAN KEEP ================= -->
+  <section id="keep" class="bg-pastel-mint py-12 px-4 sm:px-6 border-b-hard">
+    <div class="max-w-7xl mx-auto space-y-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="area4Badge" class="badge-pill bg-black text-white text-[0.65rem]">AREA 04</span>
+            <h2 id="area4Heading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Money I Can Keep (Savings & Reserve)</h2>
+          </div>
+          <p id="area4Desc" class="text-sm text-neutral-600 max-w-xl">
+            Your untouchable liquid store of wealth. This is the portion of your salary that stays in your pocket each month, building up your survival runway.
+          </p>
+        </div>
+
+        <button onclick="openKeepAdjustmentModal()" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          <span id="addKeepBtnText">Deposit / Adjust Keep</span>
+        </button>
+      </div>
+
+      <!-- Keep Metrics Cards -->
+      <div id="keepSummaryCards" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Injected via app.js -->
+      </div>
+
+      <!-- Keep Activity Ledger -->
+      <div class="border-hard rounded-container bg-white p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b-hard">
+          <span id="keepLedgerTitle" class="font-mono-tech text-xs font-bold text-neutral-500">RECENT KEEP ACCUMULATION LEDGER</span>
+          <span id="keepSyncBadge" class="badge-pill bg-pastel-mint border-hard text-[0.65rem]">Auto-Synced</span>
+        </div>
+        <div id="keepLedgerList" class="space-y-2.5">
+          <!-- Injected via app.js -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= AREA 5: CUSTOM BUDGET AREAS ================= -->
+  <section id="custom" class="bg-[#FAF9F6] py-12 px-4 sm:px-6 border-b-hard">
+    <div class="max-w-7xl mx-auto space-y-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="area5Badge" class="badge-pill bg-black text-white text-[0.65rem]">AREA 05</span>
+            <h2 id="area5Heading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Custom Budget Areas</h2>
+          </div>
+          <p id="area5Desc" class="text-sm text-neutral-600 max-w-xl">
+            Create any personalized categories (e.g., Investments, Pets, Education, Side Projects) and assign custom percentages or dollar figures from your salary.
+          </p>
+        </div>
+
+        <button onclick="openAddCustomAreaModal()" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          <span id="addCustomAreaBtnText">+ Add Custom Area</span>
+        </button>
+      </div>
+
+      <!-- Custom Areas Dynamic Grid -->
+      <div id="customAreasContainer">
+        <!-- Injected via app.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= AREA 6: GOALS & TARGETS ================= -->
+  <section id="goals" class="bg-pastel-peach py-12 px-4 sm:px-6 border-b-hard">
+    <div class="max-w-7xl mx-auto space-y-8">
+      
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="area6Badge" class="badge-pill bg-black text-white text-[0.65rem]">AREA 06</span>
+            <h2 id="area6Heading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Financial Goals & Milestones</h2>
+          </div>
+          <p id="area6Desc" class="text-sm text-neutral-600 max-w-xl">
+            Define specific milestones (emergency chest, travel, computer, debt settlement buyout). Set how much you must keep monthly to reach the goal, with automatic completion timelines.
+          </p>
+        </div>
+
+        <button onclick="openAddGoalModal()" class="btn-primary">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          <span id="addGoalBtnText">+ Create New Goal</span>
+        </button>
+      </div>
+
+      <!-- Goals Grid Cards -->
+      <div id="goalsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Injected via app.js -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="bg-white py-12 px-4 sm:px-6 border-t-hard text-center">
+    <div class="max-w-4xl mx-auto space-y-3">
+      <div id="footerTitle" class="font-extrabold text-sm tracking-tight">PERSONAL CASHFLOW & ALLOCATION LEDGER</div>
+      <p id="footerDesc" class="text-xs text-neutral-500 font-mono">
+        All financial records are stored securely inside your local browser storage and live Supabase cloud database.
+      </p>
+      <div class="pt-2 flex items-center justify-center gap-4 text-xs font-mono">
+        <button id="clearDbBtn" onclick="clearAllData()" class="text-rose-700 hover:underline">Clear Local Database</button>
+        </div>
+    </div>
+  </footer>
+
+  <!-- ================= FLOATING DOCKED BOTTOM PILL NAVIGATION ================= -->
+  <nav class="floating-dock-nav border-hard">
+    <a href="#overview" class="floating-nav-item active">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      <span id="navOverviewLabel" class="label">Overview</span>
+    </a>
+    <a href="#debts" class="floating-nav-item">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span id="navDebtsLabel" class="label">Debts</span>
+    </a>
+    <a href="#fixed" class="floating-nav-item">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      <span id="navFixedLabel" class="label">Fixed Bills</span>
+    </a>
+    <a href="#weekend" class="floating-nav-item">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span id="navWeekendLabel" class="label">Weekend</span>
+    </a>
+    <a href="#keep" class="floating-nav-item">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      <span id="navKeepLabel" class="label">Keep Reserve</span>
+    </a>
+    <a href="#custom" class="floating-nav-item">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span id="navCustomLabel" class="label">Custom</span>
+    </a>
+    <a href="#goals" class="floating-nav-item">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      <span id="navGoalsLabel" class="label">Goals</span>
+    </a>
+    <button type="button" onclick="openSettingsModal()" class="floating-nav-item">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <span id="navSettingsLabel" class="label">Settings</span>
+    </button>
+  </nav>
+
+  <!-- Core JavaScript Logic -->
+  <script src="app.js?v=9"></script>
+</body>
+</html>
